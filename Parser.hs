@@ -14,12 +14,12 @@ getTokens []
   = []
 getTokens (x : xs)
   = case x of
-      ' '  -> getTokens xs
-      '('  -> LBracket : getTokens xs
-      ')'  -> RBracket : getTokens xs
-      '~'  -> Not      : getTokens xs
-      '&'  -> And      : getTokens (tail xs)
+      ' ' -> getTokens xs
+      '(' -> LBracket : getTokens xs
+      ')' -> RBracket : getTokens xs
+      '~' -> Not      : getTokens xs
+      '&' -> And      : getTokens (tail xs)
       '|' -> Or       : getTokens (tail xs)
-      '-'  -> Implies  : getTokens (tail xs)
-      '<'  -> Implies  : getTokens (tail $ tail xs)
-      v    -> Var v    : getTokens xs
+      '-' -> Implies  : getTokens (tail xs)
+      '<' -> Iff      : getTokens (tail $ tail xs)
+      v   -> Var v    : getTokens xs
