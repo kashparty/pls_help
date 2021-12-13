@@ -6,7 +6,29 @@ data Token = Var Char
            | Or 
            | Implies 
            | Iff
-           deriving (Show, Eq)
+           deriving (Eq)
+
+instance Show Token where
+  show (Var c)
+    = [c]
+  show LBracket
+    = "("
+  show RBracket
+    = ")"
+  show Not
+    = "~"
+  show And
+    = " & "
+  show Or
+    = " | "
+  show Implies
+    = " -> "
+  show Iff
+    = " <-> "
+  showList []
+    = (++ [])
+  showList ts 
+    = (concatMap show ts ++)
 
 -- Syntax example: ~p -> ~((~q | r) & s)
 getTokens :: String -> [Token]
@@ -18,8 +40,8 @@ getTokens (x : xs)
       '(' -> LBracket : getTokens xs
       ')' -> RBracket : getTokens xs
       '~' -> Not      : getTokens xs
-      '&' -> And      : getTokens (tail xs)
-      '|' -> Or       : getTokens (tail xs)
+      '&' -> And      : getTokens xs
+      '|' -> Or       : getTokens xs
       '-' -> Implies  : getTokens (tail xs)
       '<' -> Iff      : getTokens (tail $ tail xs)
       v   -> Var v    : getTokens xs
