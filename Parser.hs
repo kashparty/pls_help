@@ -129,3 +129,10 @@ parseIff ts
         (right, rest') = parseImplies rest
     parsePartialIff left rest
       = (left, rest)
+
+parse :: [Token] -> ASTNode
+parse ts
+  | null rest  = node
+  | otherwise  = error "Incomplete parse" 
+  where
+    (node, rest) = parseIff ts
