@@ -1,3 +1,15 @@
+module Parser (
+  ASTNode(
+    ASTVar,
+    ASTNot,
+    ASTOr,
+    ASTAnd,
+    ASTImplies,
+    ASTIff
+  ),
+  parse
+) where
+
 data Token = Var Char 
            | LBracket 
            | RBracket 
@@ -130,9 +142,9 @@ parseIff ts
     parsePartialIff left rest
       = (left, rest)
 
-parse :: [Token] -> ASTNode
-parse ts
+parse :: String -> ASTNode
+parse s
   | null rest  = node
   | otherwise  = error "Incomplete parse" 
   where
-    (node, rest) = parseIff ts
+    (node, rest) = parseIff $ getTokens s
