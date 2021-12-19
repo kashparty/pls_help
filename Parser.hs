@@ -76,7 +76,25 @@ data ASTNode = ASTVar Char
              | ASTOr ASTNode ASTNode
              | ASTImplies ASTNode ASTNode
              | ASTIff ASTNode ASTNode
-             deriving (Eq, Show)
+             deriving (Eq)
+
+instance Show ASTNode where
+  show (ASTVar c)
+    = [c]
+  show ASTTop
+    = "T"
+  show ASTBottom
+    = "F"
+  show (ASTNot node)
+    = "~" ++ show node
+  show (ASTAnd left right)
+    = "(" ++ show left ++ " & " ++ show right ++ ")"
+  show (ASTOr left right)
+    = "(" ++ show left ++ " | " ++ show right ++ ")"
+  show (ASTImplies left right)
+    = "(" ++ show left ++ " -> " ++ show right ++ ")"
+  show (ASTIff left right)
+    = "(" ++ show left ++ " <-> " ++ show right ++ ")"
 
 parsePrimary :: [Token] -> (ASTNode, [Token])
 parsePrimary (LBracket : ts)
@@ -87,6 +105,8 @@ parsePrimary (Top : ts)
   = (ASTTop, ts)
 parsePrimary (Bottom : ts)
   = (ASTBottom, ts)
+parsePrimary (Not : ts)
+  = parseNot (Not : ts)
 parsePrimary (Var c : ts)
   = (ASTVar c, ts)
 
@@ -108,7 +128,7 @@ parseAnd ts
     parsePartialAnd left (And : rest)
       = (ASTAnd left right, rest')
       where
-        (right, rest') = parseNot rest
+        (right, rest') = parseAnd rest
     parsePartialAnd left rest
       = (left, rest)
 
@@ -122,7 +142,7 @@ parseOr ts
     parsePartialOr left (Or : rest)
       = (ASTOr left right, rest')
       where
-        (right, rest') = parseAnd rest
+        (right, rest') = parseOr rest
     parsePartialOr left rest
       = (left, rest)
 
@@ -136,7 +156,7 @@ parseImplies ts
     parsePartialImplies left (Implies : rest)
       = (ASTImplies left right, rest')
       where
-        (right, rest') = parseOr rest
+        (right, rest') = parseImplies rest
     parsePartialImplies left rest
       = (left, rest)
 
@@ -150,7 +170,7 @@ parseIff ts
     parsePartialIff left (Iff : rest)
       = (ASTIff left right, rest')
       where
-        (right, rest') = parseImplies rest
+        (right, rest') = parseIff rest
     parsePartialIff left rest
       = (left, rest)
 

@@ -1,10 +1,16 @@
-module Eval (
-  eval
+module Evaluator (
+  eval,
+  ExtBool (
+    ExtTrue,
+    ExtFalse,
+    ExtUnknown
+  )
 ) where
 
 import Parser 
 
 data ExtBool = ExtTrue | ExtFalse | ExtUnknown
+             deriving (Eq)
 
 instance Show ExtBool where
   show ExtTrue
