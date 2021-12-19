@@ -1,6 +1,8 @@
 module Parser (
   ASTNode(
     ASTVar,
+    ASTTop,
+    ASTBottom,
     ASTNot,
     ASTOr,
     ASTAnd,
@@ -11,6 +13,8 @@ module Parser (
 ) where
 
 data Token = Var Char 
+           | Top
+           | Bottom
            | LBracket 
            | RBracket 
            | Not 
@@ -23,6 +27,10 @@ data Token = Var Char
 instance Show Token where
   show (Var c)
     = [c]
+  show Top
+    = "T"
+  show Bottom
+    = "F"
   show LBracket
     = "("
   show RBracket
@@ -49,6 +57,8 @@ getTokens []
 getTokens (x : xs)
   = case x of
       ' ' -> getTokens xs
+      'T' -> Top      : getTokens xs
+      'F' -> Bottom   : getTokens xs
       '(' -> LBracket : getTokens xs
       ')' -> RBracket : getTokens xs
       '~' -> Not      : getTokens xs
@@ -59,6 +69,8 @@ getTokens (x : xs)
       v   -> Var v    : getTokens xs
 
 data ASTNode = ASTVar Char
+             | ASTTop
+             | ASTBottom
              | ASTNot ASTNode
              | ASTAnd ASTNode ASTNode
              | ASTOr ASTNode ASTNode
@@ -66,17 +78,17 @@ data ASTNode = ASTVar Char
              | ASTIff ASTNode ASTNode
              deriving (Eq, Show)
 
-parseVar :: [Token] -> (ASTNode, [Token])
-parseVar (Var c : ts)
-  = (ASTVar c, ts)
-
 parsePrimary :: [Token] -> (ASTNode, [Token])
 parsePrimary (LBracket : ts)
   = (node, rest)
   where
     (node, RBracket : rest) = parseIff ts
-parsePrimary ts
-  = parseVar ts
+parsePrimary (Top : ts)
+  = (ASTTop, ts)
+parsePrimary (Bottom : ts)
+  = (ASTBottom, ts)
+parsePrimary (Var c : ts)
+  = (ASTVar c, ts)
 
 parseNot :: [Token] -> (ASTNode, [Token])
 parseNot (Not : ts)

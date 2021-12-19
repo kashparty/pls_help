@@ -65,6 +65,10 @@ fromMaybeBool Nothing
 eval :: [(Char, Bool)] -> ASTNode -> ExtBool
 eval env (ASTVar c)
   = fromMaybeBool $ lookup c env
+eval env ASTTop
+  = ExtTrue
+eval env ASTBottom
+  = ExtFalse
 eval env (ASTNot node)
   = extNot $ eval env node
 eval env (ASTAnd left right)
