@@ -48,7 +48,19 @@ varAssignments (c : cs)
 
 generateTTable :: ASTNode -> TTable
 generateTTable node
-  = map (\ass -> (ass, eval ass node)) assignments 
+  = map (\ass -> (ass, eval ass node)) assignments
   where
     vars = getVars node
     assignments = varAssignments vars
+
+isValid :: ASTNode -> Bool
+isValid node
+  = all (\(_, v) -> v == ExtTrue) (generateTTable node)
+
+isSatisfiable :: ASTNode -> Bool
+isSatisfiable node
+  = any (\(_, v) -> v == ExtTrue) (generateTTable node)
+
+isUnsatisfiable :: ASTNode -> Bool
+isUnsatisfiable node
+  = all (\(_, v) -> v == ExtFalse) (generateTTable node)

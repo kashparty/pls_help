@@ -8,4 +8,4 @@ Currently supports:
 - [x] Expression evaluation
 - [ ] Expression simplification
 - [x] Truth table generation
-- [ ] Satisfiability/validity checking
+- [x] Satisfiability/validity checking
