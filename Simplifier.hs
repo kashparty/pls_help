@@ -1,6 +1,40 @@
 module Simplifier where
 import Parser
 import Evaluator
+import Data.List
+import Debug.Trace
+
+unique :: (Eq a, Ord a) => [a] -> [a]
+unique
+  = map head . group . sort
+
+disjuncts :: ASTNode -> [ASTNode]
+disjuncts (ASTOr left right)
+  = disjuncts left ++ disjuncts right
+disjuncts node
+  = [node]
+
+fromDisjuncts :: [ASTNode] -> ASTNode
+fromDisjuncts []
+  = ASTBottom
+fromDisjuncts [n]
+  = n
+fromDisjuncts ns 
+  = foldr1 ASTOr ns
+
+conjuncts :: ASTNode -> [ASTNode]
+conjuncts (ASTAnd left right)
+  = conjuncts left ++ conjuncts right
+conjuncts node
+  = [node]
+
+fromConjuncts :: [ASTNode] -> ASTNode
+fromConjuncts []
+  = ASTTop
+fromConjuncts [n]
+  = n
+fromConjuncts ns
+  = foldr1 ASTAnd ns
 
 simplify :: ASTNode -> ASTNode
 -- Simplify Not
@@ -21,66 +55,25 @@ simplify (ASTNot node)
     node' = simplify node
 
 -- Simplify Or
-simplify (ASTOr ASTTop _)
-  = ASTTop
-simplify (ASTOr _ ASTTop)
-  = ASTTop
-simplify (ASTOr ASTBottom node)
-  = simplify node
-simplify (ASTOr node ASTBottom)
-  = simplify node
-simplify (ASTOr a r@(ASTAnd b c))
-  | a' == b' || a' == c'       = a'
-  | a' == r'                   = a'
-  | a' == simplify (ASTNot r') = ASTTop
-  | a == a' && r == r'         = ASTOr a' r'
-  | otherwise                  = simplify $ ASTOr a' r'
+simplify node@(ASTOr _ _)
+  | isTop = ASTTop
+  | otherwise = foldr1 ASTOr antiAbsorb
   where
-    a' = simplify a
-    b' = simplify b
-    c' = simplify c
-    r' = simplify r
-simplify (ASTOr l@(ASTAnd b c) a)
-  = simplify (ASTOr a l)
-simplify (ASTOr left right)
-  | left' == right'                   = left'
-  | left' == simplify (ASTNot right') = ASTTop
-  | left == left' && right == right'  = ASTOr left right
-  | otherwise                         = simplify $ ASTOr left' right'
-  where
-    left' = simplify left
-    right' = simplify right
+    uniques = (unique . concatMap (disjuncts . simplify) . disjuncts) node
+    notBot = filter (/= ASTBottom) uniques
+    absorb = filter (\n -> all (`notElem` conjuncts n) $ filter (/= n) notBot) notBot
+    antiAbsorb = [fromConjuncts $ filter (\m -> simplify (ASTNot m) `notElem` absorb) $ conjuncts n | n <- absorb]
+    isTop = any (\n -> n == ASTTop || simplify (ASTNot n) `elem` antiAbsorb) antiAbsorb
 
--- Simplify And
-simplify (ASTAnd ASTBottom _)
-  = ASTBottom
-simplify (ASTAnd _ ASTBottom)
-  = ASTBottom
-simplify (ASTAnd ASTTop node)
-  = node
-simplify (ASTAnd node ASTTop)
-  = node
-simplify (ASTAnd a r@(ASTOr b c))
-  | a' == b' || a' == c'       = a'
-  | a' == r'                   = a'
-  | a' == simplify (ASTNot r') = ASTBottom
-  | a == a' && r == r'         = ASTAnd a r
-  | otherwise                  = simplify $ ASTAnd a' r'
+simplify node@(ASTAnd _ _)
+  | isBot = ASTBottom
+  | otherwise = foldr1 ASTAnd antiAbsorb
   where
-    a' = simplify a
-    b' = simplify b
-    c' = simplify c
-    r' = simplify r
-simplify (ASTAnd l@(ASTOr b c) a)
-  = simplify (ASTAnd a l)
-simplify (ASTAnd left right)
-  | left' == right'                   = left'
-  | left' == simplify (ASTNot right') = ASTBottom
-  | left == left' && right == right'  = ASTAnd left right
-  | otherwise                         = simplify $ ASTAnd left' right'
-  where
-    left' = simplify left
-    right' = simplify right
+    uniques = (unique . concatMap (conjuncts . simplify) . conjuncts) node
+    notTop = filter (/= ASTTop) uniques
+    absorb = filter (\n -> all (`notElem` disjuncts n) $ filter (/= n) notTop) notTop
+    antiAbsorb = [fromDisjuncts $ filter (\m -> simplify (ASTNot m) `notElem` absorb) $ disjuncts n | n <- absorb]
+    isBot = any (\n -> n == ASTBottom || simplify (ASTNot n) `elem` antiAbsorb) antiAbsorb
 
 -- Simplify Implies
 simplify (ASTImplies left right)

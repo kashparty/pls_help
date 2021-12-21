@@ -76,7 +76,7 @@ data ASTNode = ASTVar Char
              | ASTOr ASTNode ASTNode
              | ASTImplies ASTNode ASTNode
              | ASTIff ASTNode ASTNode
-             deriving (Eq)
+             deriving (Eq, Ord)
 
 instance Show ASTNode where
   show (ASTVar c)
