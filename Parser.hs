@@ -1,16 +1,4 @@
-module Parser (
-  ASTNode(
-    ASTVar,
-    ASTTop,
-    ASTBottom,
-    ASTNot,
-    ASTOr,
-    ASTAnd,
-    ASTImplies,
-    ASTIff
-  ),
-  parse
-) where
+module Parser where 
 
 data Token = Var Char 
            | Top

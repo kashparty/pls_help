@@ -6,6 +6,6 @@ for me.
 Currently supports:
 - [x] Expression parsing
 - [x] Expression evaluation
-- [ ] Expression simplification
+- [x] Expression simplification/minimisation
 - [x] Truth table generation
 - [x] Satisfiability/validity checking

@@ -1,12 +1,4 @@
-module Evaluator (
-  eval,
-  ExtBool (
-    ExtTrue,
-    ExtFalse,
-    ExtUnknown
-  )
-) where
-
+module Evaluator where
 import Parser 
 
 data ExtBool = ExtTrue | ExtFalse | ExtUnknown
