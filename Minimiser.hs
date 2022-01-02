@@ -1,9 +1,23 @@
 import TTableGenerator
 import Parser
 import Evaluator
-import Debug.Trace
 import Data.List
-import Simplifier (fromConjuncts, fromDisjuncts)
+
+fromDisjuncts :: [ASTNode] -> ASTNode
+fromDisjuncts []
+  = ASTBottom
+fromDisjuncts [n]
+  = n
+fromDisjuncts ns 
+  = foldr1 ASTOr ns
+
+fromConjuncts :: [ASTNode] -> ASTNode
+fromConjuncts []
+  = ASTTop
+fromConjuncts [n]
+  = n
+fromConjuncts ns
+  = foldr1 ASTAnd ns
 
 intToBin :: Int -> [Int]
 intToBin n
